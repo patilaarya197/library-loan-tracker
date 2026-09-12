@@ -24,6 +24,17 @@ A modern, full-featured **Node.js & Express** web application with **EJS** view 
 
 ---
 
+## 📸 Screenshots
+
+| Feature | Preview |
+| :--- | :--- |
+| **Dashboard View** | ![Dashboard](screenshots/Screenshot%202026-09-12%20212342.png) |
+| **Book Inventory** | ![Books](screenshots/Screenshot%202026-09-12%20212402.png) |
+| **Active Loans Management** | ![Loans](screenshots/Screenshot%202026-09-12%20212419.png) |
+| **Analytics & Pipeline Reports** | ![Analytics](screenshots/Screenshot%202026-09-12%20212434.png) |
+
+---
+
 ## 📁 Directory Structure
 
 ```text
@@ -54,6 +65,7 @@ library-loan-tracker/
 │   │   └── edit.ejs      # Edit book view
 │   └── loans/
 │       └── index.ejs     # Active loans log & return actions
+├── screenshots/          # Application UI Screenshots
 └── public/               # Static Assets
     ├── css/
     │   └── style.css     # Custom dark mode glassmorphic styling
