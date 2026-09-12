@@ -1,0 +1,150 @@
+<%- include('partials/header') %>
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h1 class="h3 fw-bold mb-1 text-white">Library Analytics & Pipeline Insights</h1>
+    <p class="text-muted mb-0">Aggregated database reports computed using Mongoose aggregation pipelines.</p>
+  </div>
+</div>
+
+<% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-octagon-fill me-2"></i> <%= error %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% } %>
+
+<!-- Table 1: Most-Borrowed Books -->
+<div class="glass-card p-4 mb-4">
+  <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-secondary border-opacity-50 pb-3">
+    <h2 class="h5 fw-bold mb-0 text-white">
+      <i class="bi bi-trophy-fill me-2 text-warning"></i>1. Top 5 Most-Borrowed Books
+    </h2>
+    <span class="badge bg-primary text-white fw-semibold px-3 py-2">Loan Aggregation</span>
+  </div>
+
+  <% if (mostBorrowedBooks && mostBorrowedBooks.length > 0) { %>
+    <div class="table-responsive">
+      <table class="table table-custom align-middle">
+        <thead>
+          <tr>
+            <th style="width: 80px;">Rank</th>
+            <th>Book Title</th>
+            <th>Author</th>
+            <th>Category</th>
+            <th class="text-end">Total Times Borrowed</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% mostBorrowedBooks.forEach((item, index) => { %>
+            <tr>
+              <td>
+                <span class="badge rounded-circle p-2 <%= index === 0 ? 'bg-warning text-dark' : index === 1 ? 'bg-info text-dark' : index === 2 ? 'bg-danger text-white' : 'bg-secondary text-white' %> fw-bold" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;">
+                  #<%= index + 1 %>
+                </span>
+              </td>
+              <td class="fw-bold text-white"><%= item.book ? item.book.title : 'Unknown' %></td>
+              <td class="text-light"><%= item.book ? item.book.author : '—' %></td>
+              <td><span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-50"><%= item.book ? item.book.category : 'General' %></span></td>
+              <td class="text-end fw-bold fs-5 text-warning"><%= item.borrowCount %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div class="text-center py-4 text-light">
+      <i class="bi bi-inbox fs-2 d-block mb-1 text-muted"></i>
+      <p class="mb-0 text-light opacity-75">No loan records available for most-borrowed aggregation.</p>
+    </div>
+  <% } %>
+</div>
+
+<!-- Table 2: Currently Overdue Loans -->
+<div class="glass-card p-4 mb-4">
+  <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-secondary border-opacity-50 pb-3">
+    <h2 class="h5 fw-bold mb-0 text-white">
+      <i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i>2. Currently Overdue Loans (> 14 Days)
+    </h2>
+    <span class="badge bg-danger text-white fw-semibold px-3 py-2">Overdue Pipeline</span>
+  </div>
+
+  <% if (overdueLoans && overdueLoans.length > 0) { %>
+    <div class="table-responsive">
+      <table class="table table-custom align-middle">
+        <thead>
+          <tr>
+            <th>Book Title</th>
+            <th>Member Name</th>
+            <th>Borrow Date</th>
+            <th>Days Elapsed</th>
+            <th class="text-end">Overdue Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% overdueLoans.forEach(loan => { %>
+            <% const daysElapsed = Math.floor((new Date() - new Date(loan.borrowDate)) / (1000 * 60 * 60 * 24)); %>
+            <tr>
+              <td class="fw-bold text-white"><%= loan.book ? loan.book.title : 'Unknown Book' %></td>
+              <td class="text-light"><%= loan.memberName %></td>
+              <td class="text-light"><%= new Date(loan.borrowDate).toLocaleDateString() %></td>
+              <td class="fw-bold text-danger"><%= daysElapsed %> days ago</td>
+              <td class="text-end">
+                <span class="badge-custom badge-overdue">
+                  <i class="bi bi-exclamation-circle-fill"></i> Overdue by <%= Math.max(0, daysElapsed - 14) %> days
+                </span>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div class="text-center py-4 text-light">
+      <i class="bi bi-shield-check fs-2 d-block mb-1 text-success opacity-75"></i>
+      <p class="mb-0 text-light">Great news! No loans are currently overdue.</p>
+    </div>
+  <% } %>
+</div>
+
+<!-- Table 3: Books Never Borrowed -->
+<div class="glass-card p-4 mb-4">
+  <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-secondary border-opacity-50 pb-3">
+    <h2 class="h5 fw-bold mb-0 text-white">
+      <i class="bi bi-book-half me-2 text-info"></i>3. Books Never Borrowed
+    </h2>
+    <span class="badge bg-info text-dark fw-semibold px-3 py-2">Unborrowed Pipeline</span>
+  </div>
+
+  <% if (neverBorrowedBooks && neverBorrowedBooks.length > 0) { %>
+    <div class="table-responsive">
+      <table class="table table-custom align-middle">
+        <thead>
+          <tr>
+            <th>Book Title</th>
+            <th>Author</th>
+            <th>Category</th>
+            <th class="text-end">Total Copies</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% neverBorrowedBooks.forEach(book => { %>
+            <tr>
+              <td class="fw-bold text-white"><%= book.title %></td>
+              <td class="text-light"><%= book.author %></td>
+              <td><span class="badge bg-secondary bg-opacity-50 text-light"><%= book.category %></span></td>
+              <td class="text-end fw-semibold text-white"><%= book.totalCopies %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div class="text-center py-4 text-light">
+      <i class="bi bi-check-all fs-2 d-block mb-1 text-info opacity-75"></i>
+      <p class="mb-0 text-light">All books in the inventory have been borrowed at least once.</p>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,27 @@
+{
+  "name": "library-loan-tracker",
+  "version": "1.0.0",
+  "description": "Library Loan Tracker web application using Node.js, Express, EJS, Bootstrap 5, and Mongoose.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node seed.js"
+  },
+  "keywords": [
+    "library",
+    "tracker",
+    "express",
+    "mongoose",
+    "ejs",
+    "bootstrap"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.9",
+    "express": "^4.19.2",
+    "mongoose": "^8.3.1"
+  }
+}

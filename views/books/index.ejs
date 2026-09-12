@@ -1,0 +1,139 @@
+<%- include('../partials/header') %>
+
+<% if (typeof message !== 'undefined' && message) { %>
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i> <%= message %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% } %>
+
+<% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-octagon-fill me-2"></i> <%= error %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% } %>
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h1 class="h3 fw-bold mb-1">Book Inventory</h1>
+    <p class="text-muted mb-0">Browse, filter, and manage your library's catalog.</p>
+  </div>
+  <button class="btn btn-primary-custom" data-bs-toggle="collapse" data-bs-target="#addBookCollapse" aria-expanded="false">
+    <i class="bi bi-plus-lg me-1"></i> Add New Book
+  </button>
+</div>
+
+<!-- Inline Form to Add a New Book -->
+<div class="collapse mb-4" id="addBookCollapse">
+  <div class="glass-card p-4">
+    <h5 class="fw-bold mb-3"><i class="bi bi-journal-plus me-2 text-primary"></i>Add New Book</h5>
+    <form action="/books" method="POST" class="row g-3">
+      <div class="col-12 col-md-4">
+        <label for="title" class="form-label">Book Title</label>
+        <input type="text" class="form-control" id="title" name="title" placeholder="Title" required>
+      </div>
+      <div class="col-12 col-md-3">
+        <label for="author" class="form-label">Author Name</label>
+        <input type="text" class="form-control" id="author" name="author" placeholder="Author" required>
+      </div>
+      <div class="col-6 col-md-3">
+        <label for="category" class="form-label">Category</label>
+        <select class="form-select" id="category" name="category" required>
+          <% categories.forEach(cat => { %>
+            <option value="<%= cat %>"><%= cat %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
+        <label for="totalCopies" class="form-label">Copies</label>
+        <input type="number" class="form-control" id="totalCopies" name="totalCopies" value="1" min="1" required>
+      </div>
+      <div class="col-12 text-end">
+        <button type="submit" class="btn btn-primary-custom">
+          <i class="bi bi-save me-1"></i> Save Book
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Search & Filter Bar -->
+<div class="glass-card p-3 mb-4">
+  <form action="/books" method="GET" class="row g-2 align-items-center">
+    <div class="col-12 col-md-7">
+      <div class="input-group">
+        <span class="input-group-text bg-transparent border-secondary border-opacity-25 text-muted"><i class="bi bi-search"></i></span>
+        <input type="text" name="search" class="form-control" placeholder="Search by title or author..." value="<%= search %>">
+      </div>
+    </div>
+    <div class="col-8 col-md-4">
+      <select name="category" class="form-select" onchange="this.form.submit()">
+        <option value="All" <%= category === 'All' ? 'selected' : '' %>>All Categories</option>
+        <% categories.forEach(cat => { %>
+          <option value="<%= cat %>" <%= category === cat ? 'selected' : '' %>><%= cat %></option>
+        <% }); %>
+      </select>
+    </div>
+    <div class="col-4 col-md-1 text-end">
+      <a href="/books" class="btn btn-outline-custom w-100" title="Reset Filters"><i class="bi bi-arrow-counterclockwise"></i></a>
+    </div>
+  </form>
+</div>
+
+<!-- Books List Table -->
+<div class="glass-card p-4">
+  <% if (books && books.length > 0) { %>
+    <div class="table-responsive">
+      <table class="table table-custom">
+        <thead>
+          <tr>
+            <th>Title & Author</th>
+            <th>Category</th>
+            <th>Total Copies</th>
+            <th>Available</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% books.forEach(book => { %>
+            <tr>
+              <td>
+                <div class="fw-bold"><%= book.title %></div>
+                <div class="small text-muted">By <%= book.author %></div>
+              </td>
+              <td><span class="badge bg-secondary bg-opacity-50 text-light fw-normal"><%= book.category %></span></td>
+              <td><span class="fw-semibold"><%= book.totalCopies %></span></td>
+              <td>
+                <span class="badge-custom <%= (book.availableCopies !== undefined ? book.availableCopies : book.totalCopies) > 0 ? 'badge-available' : 'badge-out-of-stock' %>">
+                  <%= book.availableCopies !== undefined ? book.availableCopies : book.totalCopies %> available
+                </span>
+              </td>
+              <td class="text-end">
+                <div class="d-inline-flex gap-2">
+                  <a href="/books/<%= book._id %>/edit" class="btn btn-sm btn-outline-custom" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <a href="/books/<%= book._id %>/delete" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this book?');">
+                    <i class="bi bi-trash"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-book fs-1 d-block mb-2 opacity-50"></i>
+      <h5>No books found</h5>
+      <p class="mb-3">Try clearing filters or add a new book to your repository.</p>
+      <button class="btn btn-primary-custom" data-bs-toggle="collapse" data-bs-target="#addBookCollapse">
+        <i class="bi bi-plus-lg me-1"></i> Add First Book
+      </button>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

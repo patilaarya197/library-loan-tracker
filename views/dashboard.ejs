@@ -1,0 +1,94 @@
+<%- include('partials/header') %>
+
+<div class="row align-items-center mb-4">
+  <div class="col">
+    <h1 class="h3 fw-bold mb-1">Library Dashboard</h1>
+    <p class="text-muted mb-0">Overview of book inventory, active checkouts, and overdue loans.</p>
+  </div>
+  <div class="col-auto d-flex gap-2">
+    <a href="/books" class="btn btn-outline-custom">
+      <i class="bi bi-book me-1"></i> View Books
+    </a>
+    <a href="/loans" class="btn btn-primary-custom">
+      <i class="bi bi-arrow-left-right me-1"></i> Manage Loans
+    </a>
+  </div>
+</div>
+
+<!-- Bootstrap Cards Row -->
+<div class="row g-4 mb-4">
+  <!-- Card 1: Total Books -->
+  <div class="col-12 col-md-4">
+    <div class="glass-card metric-card primary h-100">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <span class="text-muted small text-uppercase fw-semibold">Total Books</span>
+          <div class="metric-value text-primary"><%= totalBooks %></div>
+          <span class="small text-muted">Titles registered in catalog</span>
+        </div>
+        <div class="metric-icon primary">
+          <i class="bi bi-journal-bookmark-fill"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 2: Active Loans -->
+  <div class="col-12 col-md-4">
+    <div class="glass-card metric-card warning h-100">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <span class="text-muted small text-uppercase fw-semibold">Active Loans</span>
+          <div class="metric-value text-warning"><%= activeLoans %></div>
+          <span class="small text-muted">Books currently unreturned</span>
+        </div>
+        <div class="metric-icon warning">
+          <i class="bi bi-clock-history"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 3: Overdue Loans -->
+  <div class="col-12 col-md-4">
+    <div class="glass-card metric-card danger h-100">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <span class="text-muted small text-uppercase fw-semibold">Overdue Loans</span>
+          <div class="metric-value text-danger"><%= overdueLoans %></div>
+          <span class="small text-muted">Active > 14 days ago</span>
+        </div>
+        <div class="metric-icon danger">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Navigation Bar -->
+<div class="glass-card p-4">
+  <h5 class="fw-bold mb-3"><i class="bi bi-lightning-charge-fill me-2 text-warning"></i>Quick Shortcuts</h5>
+  <div class="row g-3">
+    <div class="col-12 col-md-6">
+      <a href="/books" class="btn btn-outline-custom text-start p-3 w-100 d-flex align-items-center gap-3">
+        <i class="bi bi-book fs-3 text-primary"></i>
+        <div>
+          <div class="fw-semibold">Book Inventory</div>
+          <div class="small text-muted">Browse titles and add new books to library</div>
+        </div>
+      </a>
+    </div>
+    <div class="col-12 col-md-6">
+      <a href="/loans" class="btn btn-outline-custom text-start p-3 w-100 d-flex align-items-center gap-3">
+        <i class="bi bi-journal-arrow-up fs-3 text-info"></i>
+        <div>
+          <div class="fw-semibold">Loan Tracking</div>
+          <div class="small text-muted">Issue new loans and process returns</div>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

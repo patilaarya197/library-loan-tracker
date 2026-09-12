@@ -1,0 +1,140 @@
+<%- include('../partials/header') %>
+
+<% if (typeof message !== 'undefined' && message) { %>
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i> <%= message %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% } %>
+
+<% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-octagon-fill me-2"></i> <%= error %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% } %>
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h1 class="h3 fw-bold mb-1">Active Book Loans</h1>
+    <p class="text-muted mb-0">Track active checkouts where return date is null, issue new loans, and mark returned books.</p>
+  </div>
+  <button class="btn btn-primary-custom" data-bs-toggle="collapse" data-bs-target="#issueLoanCollapse" aria-expanded="true">
+    <i class="bi bi-plus-lg me-1"></i> New Loan Form
+  </button>
+</div>
+
+<!-- Inline Form to Issue a New Loan -->
+<div class="collapse show mb-4" id="issueLoanCollapse">
+  <div class="glass-card p-4">
+    <h5 class="fw-bold mb-3"><i class="bi bi-journal-arrow-up me-2 text-primary"></i>Issue New Book Loan</h5>
+    <form action="/loans" method="POST" class="row g-3">
+      <div class="col-12 col-md-6">
+        <label for="bookId" class="form-label">Select Book</label>
+        <select class="form-select" id="bookId" name="bookId" required>
+          <option value="" selected disabled>Choose a book from catalog...</option>
+          <% booksAvailable.forEach(book => { %>
+            <option value="<%= book._id %>"><%= book.title %> — By <%= book.author %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="col-12 col-md-4">
+        <label for="memberName" class="form-label">Member Name</label>
+        <input type="text" class="form-control" id="memberName" name="memberName" placeholder="e.g. John Smith" required>
+      </div>
+      <div class="col-12 col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary-custom w-100">
+          <i class="bi bi-check-lg me-1"></i> Issue Loan
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Tabs & Search Filter -->
+<div class="glass-card p-3 mb-4">
+  <div class="row g-3 align-items-center">
+    <div class="col-12 col-md-7">
+      <div class="btn-group w-100" role="group" aria-label="Loan filters">
+        <a href="/loans?filter=active" class="btn btn-outline-custom <%= filter === 'active' ? 'active' : '' %>">Active Loans (unreturned)</a>
+        <a href="/loans?filter=all" class="btn btn-outline-custom <%= filter === 'all' ? 'active' : '' %>">All Records</a>
+        <a href="/loans?filter=returned" class="btn btn-outline-custom <%= filter === 'returned' ? 'active' : '' %>">Returned</a>
+      </div>
+    </div>
+    <div class="col-12 col-md-5">
+      <form action="/loans" method="GET" class="d-flex gap-2">
+        <input type="hidden" name="filter" value="<%= filter %>">
+        <input type="text" name="search" class="form-control" placeholder="Search by member or book title..." value="<%= search %>">
+        <button type="submit" class="btn btn-outline-custom"><i class="bi bi-search"></i></button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Active Loans Table -->
+<div class="glass-card p-4">
+  <% if (loans && loans.length > 0) { %>
+    <div class="table-responsive">
+      <table class="table table-custom">
+        <thead>
+          <tr>
+            <th>Book Title</th>
+            <th>Member Name</th>
+            <th>Borrow Date</th>
+            <th>Return Date</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% loans.forEach(loan => { %>
+            <tr>
+              <td>
+                <div class="fw-bold"><%= loan.bookId ? loan.bookId.title : 'Deleted Book' %></div>
+                <% if (loan.bookId && loan.bookId.author) { %>
+                  <div class="small text-muted">By <%= loan.bookId.author %></div>
+                <% } %>
+              </td>
+              <td>
+                <div class="fw-semibold"><%= loan.memberName %></div>
+              </td>
+              <td><%= new Date(loan.borrowDate || loan.createdAt).toLocaleDateString() %></td>
+              <td><%= loan.returnDate ? new Date(loan.returnDate).toLocaleDateString() : '— (Active)' %></td>
+              <td>
+                <% if (loan.returnDate) { %>
+                  <span class="badge-custom badge-returned"><i class="bi bi-check-circle-fill"></i> Returned</span>
+                <% } else { %>
+                  <span class="badge-custom badge-active"><i class="bi bi-clock-history"></i> Active Loan</span>
+                <% } %>
+              </td>
+              <td class="text-end">
+                <div class="d-inline-flex gap-2">
+                  <% if (!loan.returnDate) { %>
+                    <form action="/loans/<%= loan._id %>/return" method="POST">
+                      <button type="submit" class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-box-arrow-in-left me-1"></i> Return Book
+                      </button>
+                    </form>
+                  <% } %>
+                  <form action="/loans/<%= loan._id %>/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete this loan record?');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Entry">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-arrow-left-right fs-1 d-block mb-2 opacity-50"></i>
+      <h5>No <%= filter === 'active' ? 'active' : '' %> loans found</h5>
+      <p class="mb-3">No active borrow logs match your selected tab or search filter.</p>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

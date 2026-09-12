@@ -1,0 +1,194 @@
+<%- include('partials/header') %>
+
+<div class="row align-items-center mb-4">
+  <div class="col">
+    <h1 class="h3 fw-bold mb-1">Library Overview</h1>
+    <p class="text-muted mb-0">Track inventory, manage active loans, and monitor borrower status.</p>
+  </div>
+  <div class="col-auto d-flex gap-2">
+    <a href="/books" class="btn btn-outline-custom">
+      <i class="bi bi-book me-1"></i> Manage Catalog
+    </a>
+    <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#newLoanModal">
+      <i class="bi bi-plus-lg me-1"></i> Issue Loan
+    </button>
+  </div>
+</div>
+
+<!-- Metrics Row -->
+<div class="row g-3 mb-4">
+  <div class="col-12 col-sm-6 col-xl-4">
+    <div class="glass-card metric-card primary">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <span class="text-muted small text-uppercase fw-semibold">Total Titles</span>
+          <div class="metric-value"><%= stats.totalBooks %></div>
+          <span class="small text-muted"><%= stats.totalCopies %> total copies</span>
+        </div>
+        <div class="metric-icon primary">
+          <i class="bi bi-book"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-xl-4">
+    <div class="glass-card metric-card success">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <span class="text-muted small text-uppercase fw-semibold">Available Copies</span>
+          <div class="metric-value text-success"><%= stats.availableCopies %></div>
+          <span class="small text-muted"><%= stats.borrowedCopies %> checked out</span>
+        </div>
+        <div class="metric-icon success">
+          <i class="bi bi-check-circle"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-xl-4">
+    <div class="glass-card metric-card warning">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <span class="text-muted small text-uppercase fw-semibold">Active Loans</span>
+          <div class="metric-value text-warning"><%= stats.activeLoans %></div>
+          <span class="small text-muted">Currently out on loan</span>
+        </div>
+        <div class="metric-icon warning">
+          <i class="bi bi-clock-history"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Recent Loans Column -->
+  <div class="col-12 col-lg-8">
+    <div class="glass-card p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 fw-bold mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>Recent Loan Activity</h2>
+        <a href="/loans" class="btn btn-sm btn-outline-custom">View All Loans</a>
+      </div>
+
+      <% if (recentLoans && recentLoans.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-custom">
+            <thead>
+              <tr>
+                <th>Book</th>
+                <th>Member</th>
+                <th>Borrow Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recentLoans.forEach(loan => { %>
+                <tr>
+                  <td class="fw-semibold">
+                    <%= loan.bookId ? loan.bookId.title : 'Unknown Book' %>
+                  </td>
+                  <td>
+                    <div><%= loan.memberName %></div>
+                  </td>
+                  <td><%= new Date(loan.borrowDate || loan.createdAt).toLocaleDateString() %></td>
+                  <td>
+                    <% if (loan.returnDate) { %>
+                      <span class="badge-custom badge-returned"><i class="bi bi-check-lg"></i> Returned</span>
+                    <% } else { %>
+                      <span class="badge-custom badge-active"><i class="bi bi-hourglass-split"></i> Active</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (!loan.returnDate) { %>
+                      <form action="/loans/<%= loan._id %>/return" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-success">Return</button>
+                      </form>
+                    <% } else { %>
+                      <span class="text-muted small">Completed</span>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-inbox fs-1 d-block mb-2 opacity-50"></i>
+          <p class="mb-0">No recent loans recorded yet.</p>
+          <small>Click "Issue Loan" to create the first loan entry.</small>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Quick Actions Column -->
+  <div class="col-12 col-lg-4">
+    <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+      <div>
+        <h2 class="h5 fw-bold mb-3"><i class="bi bi-lightning-charge-fill me-2 text-warning"></i>Quick Actions</h2>
+        <div class="d-grid gap-2 mb-4">
+          <a href="/books" class="btn btn-outline-custom text-start p-3">
+            <i class="bi bi-plus-circle me-2 text-primary fs-5"></i>
+            <div>
+              <div class="fw-semibold">Add New Book</div>
+              <div class="small text-muted">Insert title into catalog</div>
+            </div>
+          </a>
+          <button class="btn btn-outline-custom text-start p-3" data-bs-toggle="modal" data-bs-target="#newLoanModal">
+            <i class="bi bi-journal-arrow-up me-2 text-info fs-5"></i>
+            <div>
+              <div class="fw-semibold">New Checkout</div>
+              <div class="small text-muted">Issue book to member</div>
+            </div>
+          </button>
+          <a href="/analytics" class="btn btn-outline-custom text-start p-3">
+            <i class="bi bi-graph-up-arrow me-2 text-success fs-5"></i>
+            <div>
+              <div class="fw-semibold">View Reports</div>
+              <div class="small text-muted">Explore distribution & metrics</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Issue Loan -->
+<div class="modal fade" id="newLoanModal" tabindex="-1" aria-labelledby="newLoanModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form action="/loans" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold" id="newLoanModalLabel"><i class="bi bi-plus-circle me-2 text-primary"></i>Issue New Book Loan</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="bookId" class="form-label">Select Book</label>
+            <select class="form-select" id="bookId" name="bookId" required>
+              <option value="" selected disabled>Choose an available book...</option>
+              <% popularBooks.forEach(book => { %>
+                <option value="<%= book._id %>"><%= book.title %> (By <%= book.author %>)</option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="memberName" class="form-label">Member Name</label>
+            <input type="text" class="form-control" id="memberName" name="memberName" placeholder="e.g. Jane Doe" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary-custom">Confirm & Issue Loan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
